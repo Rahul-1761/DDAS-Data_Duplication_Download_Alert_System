@@ -1,0 +1,11 @@
+#Secret
+Backend/.env
+
+#config Secrets
+Backend/config/config.js
+
+#Node Modules
+Backend/node_modules
+
+#public User Images
+Backend/public/userImages
