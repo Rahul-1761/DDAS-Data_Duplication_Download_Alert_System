@@ -1,0 +1,11 @@
+#Secret
+.env
+
+#config Secrets
+config/config.js
+
+#Node Modules
+node_modules
+
+#package-lock.json
+package-lock.json

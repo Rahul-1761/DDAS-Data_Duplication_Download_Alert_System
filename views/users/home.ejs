@@ -1,0 +1,97 @@
+<% include('../layouts/header.ejs') %>
+
+<h3>Welcome, <%= user.name %></h3>
+
+<table width="50%">
+  <tr>
+    <td>
+      <img
+        src="userImages/<%= user.image %>"
+        width="100px"
+        height="100px"
+        alt="<%= user.image %>"
+      />
+    </td>
+  </tr>
+  <tr>
+    <td>Email</td>
+    <td><%= user.email %></td>
+  </tr>
+  <tr>
+    <td>Mobile</td>
+    <td><%= user.mobile %></td>
+  </tr>
+</table>
+
+<a href="/edit?id=<%= user._id %>">Edit</a><br />
+<a href="/logout">Logout</a>
+
+<hr />
+
+<h4>📁 Download Files</h4>
+
+<table border="1" cellpadding="5" cellspacing="0" width="60%">
+  <thead>
+    <tr>
+      <th>File Name</th>
+      <th>Type</th>
+      <th>Size (KB)</th>
+      <th>Download</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% files.forEach(file => { %>
+    <tr>
+      <td><%= file.originalName %></td>
+      <td><%= file.fileType %></td>
+      <td><%= (file.size / 1024).toFixed(2) %></td>
+      <td>
+        <button onclick="downloadFile('<%= file.storedName %>')">
+          Download
+        </button>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<script>
+  function downloadFile(filename) {
+    fetch(`/download/${filename}`)
+      .then(async (response) => {
+        const contentType = response.headers.get("Content-Type");
+
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+
+          if (data.message === "already_downloaded") {
+            const confirmAgain = confirm(
+              `You’ve already downloaded "${data.filename}". Download again?`
+            );
+            if (confirmAgain) {
+              // Force download - triggers count update
+              window.location.href = `/force-download/${data.filename}`;
+            }
+          } else {
+            alert(data.message || "Unable to download file.");
+          }
+        } else {
+          // File not downloaded previously — direct download
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        }
+      })
+      .catch((err) => {
+        console.error("Download error:", err);
+        alert("Something went wrong during download.");
+      });
+  }
+</script>
+
+<% include('../layouts/footer.ejs') %>
